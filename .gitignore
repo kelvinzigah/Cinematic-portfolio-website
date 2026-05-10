@@ -1,0 +1,12 @@
+node_modules/
+dist/
+test-results/
+.playwright-mcp/
+.codex_video_samples/
+.agents/
+assets/generated/
+hero-frame-lab.html
+skills-lock.json
+*.log
+.env
+.env.*
