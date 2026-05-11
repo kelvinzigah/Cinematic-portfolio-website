@@ -1,46 +1,20 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CanvasSequence from "../components/CanvasSequence.jsx";
-import { contacts, skillGroups } from "../data/siteData.js";
+import { contacts, experiences, projects, skillGroups } from "../data/siteData.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HERO_FRAMES = 151;
+const HERO_FRAMES = 241;
 const SCOPE_FRAMES = 76;
 
 const coursework = ["Computer Architecture", "Digital Design", "Circuit Analysis", "Signals & Systems"];
+const selectedProjects = projects.slice(0, 3);
+const featuredExperience = experiences.slice(0, 2);
 
-const frameToProgress = (frame) => (frame - 1) / (HERO_FRAMES - 1);
-
-const heroFrameMap = [
-  { progress: 0, frame: 1 },
-  { progress: 0.08, frame: 1 },
-  { progress: 0.28, frame: 40 },
-  { progress: 0.48, frame: 78 },
-  { progress: 0.66, frame: 104 },
-  { progress: 0.9, frame: 137 },
-  { progress: 1, frame: 151 },
-];
-
-const smoothStep = (value) => value * value * (3 - 2 * value);
-
-const mapHeroFrameProgress = (progress) => {
-  const clamped = Math.min(Math.max(progress, 0), 1);
-
-  for (let index = 0; index < heroFrameMap.length - 1; index += 1) {
-    const start = heroFrameMap[index];
-    const end = heroFrameMap[index + 1];
-
-    if (clamped <= end.progress) {
-      const local = (clamped - start.progress) / (end.progress - start.progress || 1);
-      const frame = start.frame + (end.frame - start.frame) * smoothStep(local);
-      return frameToProgress(frame);
-    }
-  }
-
-  return 1;
-};
+const mapHeroFrameProgress = (progress) => Math.min(Math.max(progress, 0), 1);
 
 function usePauseVideoWhenHidden(videoRef, disabled) {
   useEffect(() => {
@@ -161,9 +135,6 @@ function useCrossfadeVideoLoop(primaryVideoRef, secondaryVideoRef, disabled) {
 export default function LandingPage() {
   const rootRef = useRef(null);
   const heroRef = useRef(null);
-  const heroVideoRef = useRef(null);
-  const heroVideoLoopRef = useRef(null);
-  const heroVideoLayerRef = useRef(null);
   const heroCanvasLayerRef = useRef(null);
   const heroSequenceRef = useRef(null);
   const heroBlackoutRef = useRef(null);
@@ -180,7 +151,6 @@ export default function LandingPage() {
   const scopeConsoleRef = useRef(null);
   const skillModuleRefs = useRef([]);
 
-  useCrossfadeVideoLoop(heroVideoRef, heroVideoLoopRef, false);
   useCrossfadeVideoLoop(aboutVideoRef, aboutVideoLoopRef, false);
 
   const setHeroBeatRef = useCallback(
@@ -211,8 +181,7 @@ export default function LandingPage() {
 
       gsap.set(heroBeats, { autoAlpha: 0, y: 36, scale: 0.985 });
       gsap.set(heroBeats[0], { autoAlpha: 1, y: 0, scale: 1 });
-      gsap.set(heroVideoLayerRef.current, { autoAlpha: 1 });
-      gsap.set(heroCanvasLayerRef.current, { autoAlpha: 0 });
+      gsap.set(heroCanvasLayerRef.current, { autoAlpha: 1 });
       gsap.set(heroBlackoutRef.current, { autoAlpha: 0 });
       gsap.set(aboutCopyRef.current, { autoAlpha: 0, y: 26 });
       gsap.set(aboutBlackoutRef.current, { autoAlpha: 1 });
@@ -263,8 +232,6 @@ export default function LandingPage() {
       window.__kzHeroSequenceCleanup = removeHeroSequenceDriver;
 
       heroTimeline
-        .to(heroCanvasLayerRef.current, { autoAlpha: 1, duration: 0.12, ease: "none" }, 0.035)
-        .to(heroVideoLayerRef.current, { autoAlpha: 0, duration: 0.14, ease: "none" }, 0.08)
         .to(heroBeats[0], { autoAlpha: 0, y: -26, scale: 1.01, duration: 0.05, ease: "power2.inOut" }, 0.17)
         .to(heroBeats[1], { autoAlpha: 1, y: 0, scale: 1, duration: 0.055, ease: "power2.out" }, 0.18)
         .to(heroBeats[1], { autoAlpha: 0, y: -26, scale: 1.01, duration: 0.05, ease: "power2.inOut" }, 0.36)
@@ -355,33 +322,12 @@ export default function LandingPage() {
   return (
     <div className="cinematic-home" ref={rootRef}>
       <section className="cinematic-scene cinematic-hero" ref={heroRef} aria-label="Homepage introduction">
-        <div className="hero-idle-stack" ref={heroVideoLayerRef} aria-hidden="true">
-          <video
-            ref={heroVideoRef}
-            className="hero-idle-video"
-            src="/cinematic/hero-idle.mp4"
-            poster="/cinematic/posters/hero.jpg"
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-          />
-          <video
-            ref={heroVideoLoopRef}
-            className="hero-idle-video hero-idle-video-duplicate"
-            src="/cinematic/hero-idle.mp4"
-            poster="/cinematic/posters/hero.jpg"
-            muted
-            playsInline
-            preload="auto"
-          />
-        </div>
         <div className="sequence-layer hero-sequence-layer" ref={heroCanvasLayerRef} aria-hidden="true">
           <CanvasSequence
             ref={heroSequenceRef}
-            basePath="/cinematic/hero-frames"
+            basePath="/cinematic/hero-workbench-frames"
             frameCount={HERO_FRAMES}
-            fallbackSrc="/cinematic/posters/hero.jpg"
+            fallbackSrc="/cinematic/posters/hero-workbench.jpg"
             fit="cover"
             eagerFrames={HERO_FRAMES}
           />
@@ -427,8 +373,7 @@ export default function LandingPage() {
 
         <div className="about-content-plane" ref={aboutCopyRef}>
           <div className="about-copy-plane">
-            <p className="mono section-kicker">About Me</p>
-            <h2 id="about-title">Hi, I'm Kelvin.</h2>
+            <h2 id="about-title">About me</h2>
             <p>
               I'm an electrical engineering undergrad who loves building hardware projects and exploring the systems
               behind them. I also enjoy vibe coding and building with AI agents. Outside of school, I'm usually around
@@ -471,6 +416,57 @@ export default function LandingPage() {
                 </ul>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="home-support-section experience-bridge-section" aria-labelledby="experience-bridge-title">
+        <div className="support-shell experience-bridge-shell">
+          <div className="support-heading">
+            <h2 id="experience-bridge-title">Experience</h2>
+          </div>
+          <div className="experience-preview-grid">
+            {featuredExperience.map((item) => (
+              <article className="experience-preview-card" key={`${item.role}-${item.org}`}>
+                <div className="timeline-meta mono">
+                  <span>{item.dates}</span>
+                  <span>{item.org}</span>
+                </div>
+                <h3>{item.role}</h3>
+                <p>{item.summary[0]}</p>
+              </article>
+            ))}
+          </div>
+          <div className="section-actions">
+            <Link to="/experience">View full experience</Link>
+            <Link to="/projects">View projects</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-support-section selected-work-section" aria-labelledby="selected-work-title">
+        <div className="support-shell selected-work-shell">
+          <div className="support-heading selected-work-heading">
+            <h2 id="selected-work-title">Projects</h2>
+          </div>
+          <div className="selected-work-grid">
+            {selectedProjects.map((project) => (
+              <Link className="selected-work-card" to="/projects" key={project.name}>
+                <span className="mono">{project.category}</span>
+                <h3>{project.name}</h3>
+                <p>{project.summary[0]}</p>
+                <div className="selected-work-tags">
+                  {project.tags.slice(0, 3).map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+                <strong>View project</strong>
+              </Link>
+            ))}
+          </div>
+          <div className="section-actions">
+            <Link to="/projects">View all projects</Link>
+            <Link to="/experience">View experience</Link>
           </div>
         </div>
       </section>
@@ -548,6 +544,14 @@ export default function LandingPage() {
               Send
             </button>
           </form>
+          <div className="contact-action-row" aria-label="Recruiter actions">
+            <a href={`mailto:${contacts.email}`}>Email me</a>
+            <a href={contacts.resume} download>
+              Download resume
+            </a>
+            <Link to="/projects">View projects</Link>
+            <Link to="/experience">View experience</Link>
+          </div>
         </div>
       </section>
     </div>
