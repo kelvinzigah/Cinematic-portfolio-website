@@ -8,7 +8,7 @@ export const contacts = {
 export const skillGroups = [
   {
     label: "Hardware / Electronics",
-    skills: ["FPGA design", "Analog circuits", "Digital design", "ARM assembly", "Firmware"],
+    skills: ["FPGA design", "Analog circuits", "Digital design"],
   },
   {
     label: "Embedded / Firmware",
@@ -20,15 +20,11 @@ export const skillGroups = [
   },
   {
     label: "Lab Automation / Test Systems",
-    skills: ["Python", "LTSpice", "Linux", "Git"],
-  },
-  {
-    label: "Software / Web",
-    skills: ["Python", "C++", "Git", "Linux"],
+    skills: ["Python", "LTSpice"],
   },
   {
     label: "Tools",
-    skills: ["Altium Designer", "LTSpice", "Quartus Prime", "ModelSim", "Vivado", "Git", "Linux"],
+    skills: ["Altium Designer", "Git", "Linux"],
   },
   {
     label: "Soft Skills",

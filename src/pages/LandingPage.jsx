@@ -153,6 +153,61 @@ export default function LandingPage() {
 
   useCrossfadeVideoLoop(aboutVideoRef, aboutVideoLoopRef, false);
 
+  // hasScrolledRef: true once the user (or a restore) has produced a real scroll event.
+  // isUnmountingRef: set true in useLayoutEffect cleanup so the scroll listener stops
+  //   writing to sessionStorage before context.revert() fires its own scroll events.
+  const hasScrolledRef = useRef(false);
+  const isUnmountingRef = useRef(false);
+
+  // Persist scroll position on every tick. Ignored while unmounting so that the
+  // synthetic scroll event emitted by context.revert() (which collapses pin spacers
+  // back to 0) cannot overwrite the good saved value.
+  useEffect(() => {
+    let raf = null;
+    const save = () => {
+      raf = null;
+      if (isUnmountingRef.current) return;
+      const y = window.__kzLenis?.animatedScroll ?? window.scrollY;
+      sessionStorage.setItem("kz-home-scroll", String(Math.round(y)));
+      hasScrolledRef.current = true;
+    };
+    const onScroll = () => {
+      if (isUnmountingRef.current || raf) return;
+      raf = window.requestAnimationFrame(save);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.__kzLenis?.on?.("scroll", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.__kzLenis?.off?.("scroll", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  // Restore scroll position after returning from another route.
+  useEffect(() => {
+    const saved = sessionStorage.getItem("kz-home-scroll");
+    if (!saved || saved === "0") return undefined;
+
+    // Wait until SmoothScroll's deferred ScrollTrigger.refresh() (120ms) has recalculated
+    // pin-spacer heights before scrolling. Call lenis.resize() first to ensure Lenis has
+    // up-to-date scroll bounds before clamping the target.
+    const timer = window.setTimeout(() => {
+      const y = Number(saved);
+      const lenis = window.__kzLenis;
+      if (lenis) {
+        lenis.resize();
+        lenis.scrollTo(y, { immediate: true, force: true });
+      } else {
+        window.scrollTo({ top: y, behavior: "instant" });
+      }
+    }, 160);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const setHeroBeatRef = useCallback(
     (index) => (element) => {
       heroBeatRefs.current[index] = element;
@@ -168,6 +223,8 @@ export default function LandingPage() {
   );
 
   useLayoutEffect(() => {
+    hasScrolledRef.current = false;
+    isUnmountingRef.current = false;
     const isMobile = window.matchMedia("(max-width: 760px)").matches;
     let removeHeroSequenceDriver = () => {};
     let removeScopeSequenceDriver = () => {};
@@ -313,6 +370,14 @@ export default function LandingPage() {
     }, rootRef);
 
     return () => {
+      // Save position before context.revert() so we capture the real scroll value.
+      // Then set isUnmountingRef so the scroll listener ignores the synthetic scroll
+      // event that fires when GSAP removes pin spacers and the page collapses.
+      if (hasScrolledRef.current) {
+        const y = window.__kzLenis?.animatedScroll ?? window.scrollY;
+        sessionStorage.setItem("kz-home-scroll", String(Math.round(y)));
+      }
+      isUnmountingRef.current = true;
       removeHeroSequenceDriver();
       removeScopeSequenceDriver();
       context.revert();
