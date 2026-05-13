@@ -1,5 +1,56 @@
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { experiences } from "../data/siteData.js";
+
+function useReveal() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      el.dataset.revealed = "true";
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.dataset.revealed = "true";
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-10% 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
+
+function TimelineItem({ item, index }) {
+  const ref = useReveal();
+  return (
+    <article
+      className="timeline-item"
+      ref={ref}
+      data-direction={index % 2 ? "right" : "left"}
+    >
+      <div className="timeline-node mono">{String(index + 1).padStart(2, "0")}</div>
+      <div className="timeline-card">
+        <div className="timeline-meta mono">
+          <span>{item.dates}</span>
+          <span>{item.location}</span>
+        </div>
+        <h2>{item.role}</h2>
+        <h3>{item.org}</h3>
+        <ul>
+          {item.summary.map((point) => (
+            <li key={point}>{point}</li>
+          ))}
+        </ul>
+      </div>
+    </article>
+  );
+}
 
 export default function ExperiencePage() {
   return (
@@ -12,29 +63,7 @@ export default function ExperiencePage() {
         </div>
         <div className="timeline">
           {experiences.map((item, index) => (
-            <motion.article
-              className="timeline-item"
-              key={`${item.role}-${item.org}`}
-              initial={{ opacity: 0, x: index % 2 ? 32 : -32 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-            >
-              <div className="timeline-node mono">{String(index + 1).padStart(2, "0")}</div>
-              <div className="timeline-card">
-                <div className="timeline-meta mono">
-                  <span>{item.dates}</span>
-                  <span>{item.location}</span>
-                </div>
-                <h2>{item.role}</h2>
-                <h3>{item.org}</h3>
-                <ul>
-                  {item.summary.map((point) => (
-                    <li key={point}>{point}</li>
-                  ))}
-                </ul>
-              </div>
-            </motion.article>
+            <TimelineItem key={`${item.role}-${item.org}`} item={item} index={index} />
           ))}
         </div>
       </div>

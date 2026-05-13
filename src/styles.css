@@ -1359,6 +1359,18 @@ button {
   display: grid;
   grid-template-columns: 3.5rem 1fr;
   gap: 1rem;
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.timeline-item[data-direction="right"] {
+  transform: translateX(32px);
+}
+
+.timeline-item[data-revealed="true"] {
+  opacity: 1;
+  transform: none;
 }
 
 .timeline-node {
@@ -1907,5 +1919,92 @@ button {
     min-width: 10rem;
     min-height: 4.8rem;
     border-radius: 20px;
+  }
+}
+
+/* ── 404 page ─────────────────────────────────────────────── */
+
+.not-found-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.not-found-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 2rem;
+}
+
+.not-found-code {
+  font-size: clamp(4rem, 15vw, 8rem);
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0;
+}
+
+.not-found-page h1 {
+  font-size: clamp(2rem, 7vw, 3.8rem);
+  margin: 0;
+}
+
+.not-found-sub {
+  color: var(--muted);
+  margin: 0;
+}
+
+.not-found-link {
+  margin-top: 1rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.not-found-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--cyan);
+}
+
+/* ── Reduced motion ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .timeline-item,
+  .timeline-item[data-direction="right"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /* Reveal all pinned-scene content immediately without transitions */
+  .cinematic-scene,
+  .about-content-plane,
+  .scope-console,
+  .hero-beat:first-child {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .scene-blackout {
+    display: none !important;
+  }
+
+  .loading-intro {
+    transition: none !important;
   }
 }

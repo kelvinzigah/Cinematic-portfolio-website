@@ -7,6 +7,7 @@ import SmoothScroll from "./components/SmoothScroll.jsx";
 const LandingPage = lazy(() => import("./pages/LandingPage.jsx"));
 const ExperiencePage = lazy(() => import("./pages/ExperiencePage.jsx"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage.jsx"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/experience" element={<ExperiencePage />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>

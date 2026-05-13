@@ -225,6 +225,25 @@ export default function LandingPage() {
   useLayoutEffect(() => {
     hasScrolledRef.current = false;
     isUnmountingRef.current = false;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      const heroBeats = heroBeatRefs.current.filter(Boolean);
+      const skillModules = skillModuleRefs.current.filter(Boolean);
+      gsap.set(heroBeats[0], { autoAlpha: 1, y: 0, scale: 1 });
+      gsap.set(heroCanvasLayerRef.current, { autoAlpha: 1 });
+      gsap.set(heroBlackoutRef.current, { autoAlpha: 0 });
+      gsap.set(aboutCopyRef.current, { autoAlpha: 1, y: 0 });
+      gsap.set(aboutBlackoutRef.current, { autoAlpha: 0 });
+      gsap.set(scopeConsoleRef.current, { autoAlpha: 1, y: 0 });
+      gsap.set(skillModules, { autoAlpha: 1, y: 0 });
+      heroSequenceRef.current?.setProgress(0);
+      scopeSequenceRef.current?.setProgress(1);
+      return () => {
+        isUnmountingRef.current = true;
+      };
+    }
+
     const isMobile = window.matchMedia("(max-width: 760px)").matches;
     let removeHeroSequenceDriver = () => {};
     let removeScopeSequenceDriver = () => {};
@@ -447,7 +466,10 @@ export default function LandingPage() {
             </p>
           </div>
           <figure className="about-portrait-frame" aria-label="Portrait of Kelvin Zigah">
-            <img src="/cinematic/kelvin-portrait.png" alt="Kelvin Zigah" />
+            <picture>
+              <source srcSet="/cinematic/kelvin-portrait.webp" type="image/webp" />
+              <img src="/cinematic/kelvin-portrait.png" alt="Kelvin Zigah" width="800" loading="lazy" decoding="async" />
+            </picture>
           </figure>
         </div>
       </section>
@@ -460,8 +482,8 @@ export default function LandingPage() {
             frameCount={SCOPE_FRAMES}
             fallbackSrc="/cinematic/posters/skills-oscilloscope-clean.png"
             fit="contain"
-            eagerFrames={SCOPE_FRAMES}
-            fetchPriority="high"
+            eagerFrames={4}
+            fetchPriority="auto"
           />
         </div>
         <div className="scene-vignette scope-vignette" aria-hidden="true" />
@@ -611,7 +633,7 @@ export default function LandingPage() {
           </form>
           <div className="contact-action-row" aria-label="Recruiter actions">
             <a href={`mailto:${contacts.email}`}>Email me</a>
-            <a href={contacts.resume} download>
+            <a href={contacts.resume} target="_blank" rel="noreferrer">
               Download resume
             </a>
             <Link to="/projects">View projects</Link>
