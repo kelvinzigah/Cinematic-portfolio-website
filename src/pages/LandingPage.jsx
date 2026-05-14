@@ -226,24 +226,6 @@ export default function LandingPage() {
     hasScrolledRef.current = false;
     isUnmountingRef.current = false;
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-      const heroBeats = heroBeatRefs.current.filter(Boolean);
-      const skillModules = skillModuleRefs.current.filter(Boolean);
-      gsap.set(heroBeats[0], { autoAlpha: 1, y: 0, scale: 1 });
-      gsap.set(heroCanvasLayerRef.current, { autoAlpha: 1 });
-      gsap.set(heroBlackoutRef.current, { autoAlpha: 0 });
-      gsap.set(aboutCopyRef.current, { autoAlpha: 1, y: 0 });
-      gsap.set(aboutBlackoutRef.current, { autoAlpha: 0 });
-      gsap.set(scopeConsoleRef.current, { autoAlpha: 1, y: 0 });
-      gsap.set(skillModules, { autoAlpha: 1, y: 0 });
-      heroSequenceRef.current?.setProgress(0);
-      scopeSequenceRef.current?.setProgress(1);
-      return () => {
-        isUnmountingRef.current = true;
-      };
-    }
-
     const isMobile = window.matchMedia("(max-width: 760px)").matches;
     let removeHeroSequenceDriver = () => {};
     let removeScopeSequenceDriver = () => {};

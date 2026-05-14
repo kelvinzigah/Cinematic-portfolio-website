@@ -1989,22 +1989,4 @@ button {
     transform: none;
     transition: none;
   }
-
-  /* Reveal all pinned-scene content immediately without transitions */
-  .cinematic-scene,
-  .about-content-plane,
-  .scope-console,
-  .hero-beat:first-child {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
-  .scene-blackout {
-    display: none !important;
-  }
-
-  .loading-intro {
-    transition: none !important;
-  }
 }
